@@ -438,7 +438,9 @@ class WorkspaceDetail(CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            self.workspace = Workspace.objects.get(name=self.kwargs["name"])
+            self.workspace = Workspace.objects.select_related("created_by").get(
+                name=self.kwargs["name"]
+            )
         except Workspace.DoesNotExist:
             return redirect("/")
 
