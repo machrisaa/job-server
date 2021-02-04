@@ -138,9 +138,7 @@ class JobZombify(View):
 
 class JobRequestDetail(DetailView):
     model = JobRequest
-    queryset = JobRequest.objects.select_related(
-        "created_by", "workspace"
-    ).prefetch_related("jobs")
+    queryset = JobRequest.with_jobs.select_related("created_by", "workspace")
     template_name = "job_request_detail.html"
 
 
@@ -168,11 +166,7 @@ class JobRequestList(FormMixin, ListView):
         return context
 
     def get_queryset(self):
-        qs = (
-            JobRequest.objects.prefetch_related("jobs")
-            .select_related("workspace")
-            .order_by("-pk")
-        )
+        qs = JobRequest.with_jobs.select_related("backend", "workspace").order_by("-pk")
 
         q = self.request.GET.get("q")
         if q:
@@ -540,7 +534,7 @@ class WorkspaceDetail(CreateView):
 
     def get_latest_job_request(self):
         return (
-            self.workspace.job_requests.prefetch_related("jobs")
+            JobRequest.with_jobs.filter(workspace=self.workspace)
             .order_by("-created_at")
             .first()
         )

@@ -3,18 +3,19 @@ import binascii
 import json
 import os
 import secrets
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import structlog
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_slug
 from django.db import models
-from django.db.models import Q
+from django.db.models import Count, Min, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from environs import Env
+from first import first
 from furl import furl
 
 from .backends import get_configured_backends
@@ -171,6 +172,31 @@ class Job(models.Model):
         return Runtime(int(hours), int(minutes), int(seconds), int(total_seconds))
 
 
+class JobRequestWithJobsManager(models.Manager):
+    def get_queryset(self):
+        """
+        Cross-Job manager for JobRequests
+
+        JobRequests are a group of 0+ Jobs.  Various pages need values
+        aggregated from those Jobs.  This Manager calculates those values where
+        it's possible to do so in the database.
+        """
+        qs = super().get_queryset()
+
+        # prefetch related Jobs
+        qs = qs.prefetch_related("jobs")
+
+        # number of completed Jobs
+        qs = qs.annotate(
+            num_completed=Count("jobs", filter=Q(jobs__status="succeeded"))
+        )
+
+        # earliest started_at from a related Job
+        qs = qs.annotate(started_at=Min("jobs__started_at"))
+
+        return qs
+
+
 class JobRequest(models.Model):
     """
     A request to run a Job
@@ -204,12 +230,25 @@ class JobRequest(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
 
-    def get_absolute_url(self):
-        return reverse("job-request-detail", kwargs={"pk": self.pk})
+    objects = models.Manager()
+    with_jobs = JobRequestWithJobsManager()
 
     @property
     def completed_at(self):
-        last_job = self.jobs.order_by("completed_at").last()
+        """
+        Get a completed_at datetime if there is a relevant Job
+
+        We can't make this calculation in the database since we need to know
+        the status for this instance which is done in Python.
+        """
+        last_job = first(
+            sorted(
+                self.jobs.all(),
+                key=lambda j: j.completed_at
+                or datetime.max.replace(tzinfo=timezone.utc),
+                reverse=True,
+            )
+        )
 
         if not last_job:
             return
@@ -218,6 +257,9 @@ class JobRequest(models.Model):
             return
 
         return last_job.completed_at
+
+    def get_absolute_url(self):
+        return reverse("job-request-detail", kwargs={"pk": self.pk})
 
     def get_project_yaml_url(self):
         f = furl(self.workspace.repo)
@@ -254,10 +296,6 @@ class JobRequest(models.Model):
         return self.jobs.filter(action="__error__").exists()
 
     @property
-    def num_completed(self):
-        return len([j for j in self.jobs.all() if j.status == "succeeded"])
-
-    @property
     def runtime(self):
         """
         Combined runtime for all finished Jobs of this JobRequest
@@ -284,17 +322,8 @@ class JobRequest(models.Model):
         return Runtime(int(hours), int(minutes), int(seconds))
 
     @property
-    def started_at(self):
-        first_job = self.jobs.exclude(started_at=None).order_by("started_at").first()
-
-        if not first_job:
-            return
-
-        return first_job.started_at
-
-    @property
     def status(self):
-        statuses = self.jobs.values_list("status", flat=True)
+        statuses = [j.status for j in self.jobs.all()]
 
         # when they're all the same, just use that
         if len(set(statuses)) == 1:
