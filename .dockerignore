@@ -6,3 +6,4 @@
 pyproject.toml
 tests
 venv
+private-*

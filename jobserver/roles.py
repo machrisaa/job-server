@@ -1,3 +1,4 @@
+from django.conf import settings
 from .github import is_member_of_org
 
 
@@ -11,5 +12,5 @@ def can_run_jobs(user):
     """
     if not user.is_authenticated:
         return False
-
-    return is_member_of_org("opensafely", user.username)
+    
+    return is_member_of_org(settings.GIT_ORGANIZATION_NAME, user.username)
