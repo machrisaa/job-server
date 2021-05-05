@@ -124,7 +124,8 @@ class BaseWorkspaceDetail(CreateView):
             backend = Backend.objects.get(name=form.cleaned_data.pop("backend"))
         else:
             # For non-superusers we're only exposing one backend currently.
-            backend = Backend.objects.get(name="tpp")
+            # backend = Backend.objects.get(name="tpp") # FIXME change to Graphnet backend
+            backend = Backend.objects.get(name="graphnet")
 
         backend.job_requests.create(
             workspace=self.workspace,

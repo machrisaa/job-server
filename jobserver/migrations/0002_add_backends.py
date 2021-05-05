@@ -13,6 +13,7 @@ def add_backends(apps, schema_editor):
         display_name="TPP",
         parent_directory="/d/Level4Files/workspaces",
     )
+    Backend.objects.create(name="graphnet", display_name="Graphnet")
 
 
 def remove_backends(apps, schema_editor):
