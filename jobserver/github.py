@@ -14,7 +14,7 @@ def get_branch(repo, branch):
     f = furl(BASE_URL)
     f.path.segments += [
         "repos",
-        "opensafely",
+        settings.GIT_ORGANIZATION_NAME,
         repo,
         "branches",
         branch,
@@ -48,7 +48,7 @@ def get_file(repo, branch):
     f = furl(BASE_URL)
     f.path.segments += [
         "repos",
-        "opensafely",
+        settings.GIT_ORGANIZATION_NAME,
         repo,
         "contents",
         "project.yaml",

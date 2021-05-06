@@ -163,7 +163,7 @@ SOCIAL_AUTH_GITHUB_SECRET = env.str("SOCIAL_AUTH_GITHUB_SECRET")
 SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
 
 # GIT_ORGANIZATION_NAME = "opensafely"
-GIT_ORGANIZATION_NAME = "graphnet-opensafely"
+GIT_ORGANIZATION_NAME = env.str("GIT_ORGANIZATION_NAME", default="graphnet-opensafely")
 
 # Messages
 # https://docs.djangoproject.com/en/3.0/ref/contrib/messages/
