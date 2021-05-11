@@ -21,9 +21,9 @@ services:
     volumes:
       - ${DB_DIR}:/app/db
     ports:
-      - 8000:8000
+      - 80:8000
     # for the first run, after first migrate:
 #    entrypoint: /app/manage.py createsuperuser --noinput
     command: /app/manage.py runserver 0.0.0.0:8000
 
-# docker-compose -f graphnet-docker-compose.yml --env-file private-graphnet.env up
+# docker-compose -f docker-compose.graphnet.dev.yml --env-file .env.graphnet up

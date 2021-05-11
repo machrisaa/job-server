@@ -1,0 +1,43 @@
+# docker configuration for running a production server
+# https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
+# https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+version: "3.6"
+
+services:
+  job-server:
+    build: .
+    environment:
+      - ADMIN_USERS
+      - DJANGO_SUPERUSER_USERNAME
+      - DJANGO_SUPERUSER_PASSWORD
+      - DJANGO_SUPERUSER_EMAIL
+      - DEBUG
+      - SECRET_KEY
+      - GITHUB_TOKEN
+      - GIT_ORGANIZATION_NAME
+      - SOCIAL_AUTH_GITHUB_KEY
+      - SOCIAL_AUTH_GITHUB_SECRET
+      - DATABASE_URL
+      - BACKENDS
+      - GRAPHNET_BACKEND_TOKEN
+    volumes:
+      - ${DB_DIR}:/app/db
+      - static_volume:/app/staticfiles
+    expose:
+      - 8080
+    # for the first run, after first migrate:
+#    entrypoint: /app/manage.py createsuperuser --noinput
+    command: gunicorn --bind 0.0.0.0:8080 jobserver.wsgi
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/staticfiles
+    ports:
+      - 80:80
+    depends_on:
+      - job-server
+
+volumes:
+  static_volume:
+
+# docker-compose -f docker-compose.graphnet.prod.yml --env-file .env.graphnet up --build
