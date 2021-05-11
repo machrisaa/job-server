@@ -39,6 +39,8 @@ DEBUG = env.bool("DEBUG", default=False)
 
 BASE_URL = env.str("BASE_URL", default="http://localhost:8000")
 
+GRAPHNET_BACKEND_TOKEN = env.str("GRAPHNET_BACKEND_TOKEN")
+
 ALLOWED_HOSTS = [furl(BASE_URL).host]
 
 

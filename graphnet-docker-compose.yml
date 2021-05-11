@@ -1,0 +1,29 @@
+# docker configuration for running a development server
+version: "3.6"
+
+services:
+  job-server:
+    build: .
+    environment:
+      - ADMIN_USERS
+      - DJANGO_SUPERUSER_USERNAME
+      - DJANGO_SUPERUSER_PASSWORD
+      - DJANGO_SUPERUSER_EMAIL
+      - DEBUG
+      - SECRET_KEY
+      - GITHUB_TOKEN
+      - GIT_ORGANIZATION_NAME
+      - SOCIAL_AUTH_GITHUB_KEY
+      - SOCIAL_AUTH_GITHUB_SECRET
+      - DATABASE_URL
+      - BACKENDS
+      - GRAPHNET_BACKEND_TOKEN
+    volumes:
+      - ${DB_DIR}:/app/db
+    ports:
+      - 8000:8000
+    # for the first run, after first migrate:
+#    entrypoint: /app/manage.py createsuperuser --noinput
+    command: /app/manage.py runserver 0.0.0.0:8000
+
+# docker-compose -f graphnet-docker-compose.yml --env-file private-graphnet.env up
