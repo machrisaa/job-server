@@ -78,6 +78,3 @@ Run the following commands to start the web server:
 3. `python3 ./manage.py ensure_admins`
 4. `python3 ./manage.py collectstatic --no-input`
 5. `python3 ./manage.py runserver localhost:8000`
-
-# Deployment (TODO)
-
