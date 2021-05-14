@@ -53,7 +53,23 @@ Change the following code in the project to make the project unlink to the opens
 
 # local test
 
-See [private-local-test.sh](./private-local-test.sh)
+The job-server can be started locally with the [local-test.sh](./local-test.sh). This file depends on a private `.env.graphnet` file, which is not included int this repository for security reason. But these are the environment variables located in this file:
+
+- ADMIN_USERS - the damin username
+- DJANGO_SUPERUSER_USERNAME - see https://docs.djangoproject.com/en/3.2/ref/django-admin/#createsuperuser
+- DJANGO_SUPERUSER_PASSWORD - see https://docs.djangoproject.com/en/3.2/ref/django-admin/#createsuperuser
+- DJANGO_SUPERUSER_EMAIL - see https://docs.djangoproject.com/en/3.2/ref/django-admin/#createsuperuser
+- DEBUG - set it to 1 to turn on the debug function of django
+- SECRET_KEY - used by django for the database access
+- GITHUB_TOKEN - GitHub -> setting -> Personal access tokens
+- GIT_ORGANIZATION_NAME - the name of the organisation on GitHub, e.g. graphnet-opensafely
+- SOCIAL_AUTH_GITHUB_KEY - GitHub -> setting -> Developer settings -> <the App> -> Client ID
+- SOCIAL_AUTH_GITHUB_SECRET - GitHub -> setting -> Developer settings -> <the App> -> Client secrets
+- DATABASE_URL - sqlite:///db/db.sqlite3 (will be mapped to /app/db in th econtainer)
+- BACKENDS - emis,expectations,tpp,graphnet
+- GRAPHNET_BACKEND_TOKEN - the token for create the graphnet backend 
+- DB_DIR - the host dir to save the sqlite db file
+
 
 Run the following commands to start the web server:
 
