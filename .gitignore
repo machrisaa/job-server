@@ -12,3 +12,7 @@ staticfiles
 releases
 .env*
 private-*
+nginx/domain.crt
+nginx/domain.rsa
+nginx/int-poc-opensafely-grhapp-com.pfx
+nginx/nginx.prod.conf
